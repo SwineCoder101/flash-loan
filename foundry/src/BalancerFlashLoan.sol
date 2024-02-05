@@ -1,7 +1,8 @@
 pragma solidity ^0.7.0;
 
-import "@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
-import "@balancer-labs/v2-interfaces/contracts/vault/IFlashLoanRecipient.sol";
+import {IFlashLoanRecipient} from "../lib/balancer-v2-monorepo/pkg/interfaces/contracts/vault/IFlashLoanRecipient.sol";
+import {IVault} from "../lib/balancer-v2-monorepo/pkg/interfaces/contracts/vault/IVault.sol";
+
 
 contract FlashLoanRecipient is IFlashLoanRecipient {
     IVault private constant vault = "0xBA12222222228d8Ba445958a75a0704d566BF2C8";
@@ -21,6 +22,5 @@ contract FlashLoanRecipient is IFlashLoanRecipient {
         bytes memory userData
     ) external override {
         require(msg.sender == vault);
-        ...
     }
 }
