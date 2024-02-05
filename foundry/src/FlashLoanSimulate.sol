@@ -6,39 +6,13 @@ import {FlashLoanSimpleReceiverBase} from "../lib/aave-v3-core/contracts/flashlo
 import {IPoolAddressesProvider} from "../lib/aave-v3-core/contracts/interfaces/IPoolAddressesProvider.sol";
 import {IERC20} from "../lib/aave-v3-core/contracts/dependencies/openzeppelin/contracts/IERC20.sol";
 
-interface IDex {
-    function depositUSDC(uint256 _amount) external;
-
-    function depositDAI(uint256 _amount) external;
-
-    function buyDAI() external;
-
-    function sellDAI() external;
-}
-
-contract FlashLoanArbitrage is FlashLoanSimpleReceiverBase {
+contract FlashLoanSimulate is FlashLoanSimpleReceiverBase {
     address payable owner;
 
-    // Aave ERC20 Token addresses on Goerli network
-    // address private immutable daiAddress =
-    //     0xDF1742fE5b0bFc12331D8EAec6b478DfDbD31464;
-    // address private immutable usdcAddress =
-    //     0xA2025B15a1757311bfD68cb14eaeFCc237AF5b43;
-    // address private dexContractAddress =
-    //     0xD6e8c479B6B62d8Ce985C0f686D39e96af9424df;
-
-    IERC20 private dai;
-    IERC20 private usdc;
-    IDex private dexContract;
-
-    constructor(address _addressProvider, address daiAddress, address usdcAddress, address dexContractAddress)
+    constructor(address _addressProvider)
         FlashLoanSimpleReceiverBase(IPoolAddressesProvider(_addressProvider))
     {
         owner = payable(msg.sender);
-
-        dai = IERC20(daiAddress);
-        usdc = IERC20(usdcAddress);
-        dexContract = IDex(dexContractAddress);
     }
 
     /**
@@ -56,16 +30,12 @@ contract FlashLoanArbitrage is FlashLoanSimpleReceiverBase {
         // Your logic goes here.
         //
 
-        // Arbirtage operation
-        dexContract.depositUSDC(1000000000); // 1000 USDC
-        dexContract.buyDAI();
-        dexContract.depositDAI(dai.balanceOf(address(this)));
-        dexContract.sellDAI();
-
         // At the end of your logic above, this contract owes
         // the flashloaned amount + premiums.
         // Therefore ensure your contract has enough to repay
         // these amounts.
+
+        
 
         // Approve the Pool contract allowance to *pull* the owed amount
         uint256 amountOwed = amount + premium;
@@ -88,22 +58,6 @@ contract FlashLoanArbitrage is FlashLoanSimpleReceiverBase {
             params,
             referralCode
         );
-    }
-
-    function approveUSDC(uint256 _amount) external returns (bool) {
-        return usdc.approve(address(dexContract), _amount);
-    }
-
-    function allowanceUSDC() external view returns (uint256) {
-        return usdc.allowance(address(this), address(dexContract));
-    }
-
-    function approveDAI(uint256 _amount) external returns (bool) {
-        return dai.approve(address(dai), _amount);
-    }
-
-    function allowanceDAI() external view returns (uint256) {
-        return dai.allowance(address(this), address(dexContract));
     }
 
     function getBalance(address _tokenAddress) external view returns (uint256) {
